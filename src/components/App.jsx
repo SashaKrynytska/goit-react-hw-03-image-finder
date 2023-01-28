@@ -10,17 +10,22 @@ import css from './App.module.css';
 export class App extends Component {
   state = {
     images: [],
-    currentPage: 1,
-    searchQuery: '',
+    page: 1,
+    query: '',
     isLoading: false,
     showModal: false,
+    totalImages: 0,
     largeImage: '',
-    error: null,
+    error: '',
   };
 
-  // когда при обновлении запрос не равен между стейтами, делаем фетч
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.searchQuery !== this.state.searchQuery) {
+    if (
+      prevState.query !== this.state.query ||
+      prevState.page !== this.state.page
+    ) {
+      console.log(prevState.page);
+      console.log(this.state.page);
       this.getImages();
     }
   }
@@ -29,33 +34,38 @@ export class App extends Component {
   onChangeQuery = query => {
     this.setState({
       images: [],
-      currentPage: 1,
-      searchQuery: query,
-      error: null,
+      page: 1,
+      query: query,
+      totalImages: 0,
     });
   };
 
   getImages = async () => {
-    const { currentPage, searchQuery } = this.state;
-
+    const { page, query } = this.state;
     this.setState({
       isLoading: true,
     });
 
     try {
-      const { hits } = await fetchImages(searchQuery, currentPage);
+      const response = await fetchImages(query, page);
 
-      this.setState(prevState => ({
-        images: [...prevState.images, ...hits],
-        currentPage: prevState.currentPage + 1,
+      const dataImages = response.hits.map(({ id, tags, largeImageURL }) => ({
+        id,
+        tags,
+        largeImageURL,
       }));
 
-      if (currentPage !== 1) {
+      this.setState(prevState => ({
+        images: [...prevState.images, ...dataImages],
+        totalImages: response.totalHits,
+        error: '',
+      }));
+
+      if (page !== 1) {
         this.scrollOnLoadButton();
       }
     } catch (error) {
-      console.log('что-то пошло не так', error);
-      this.setState({ error });
+      this.setState({ error: 'Something wrong... Try again!' });
     } finally {
       this.setState({
         isLoading: false,
@@ -86,18 +96,26 @@ export class App extends Component {
     });
   };
 
+  loadMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
+  };
+
   render() {
-    const { images, isLoading, showModal } = this.state;
-    const ShowLoadMore = images.length > 0 && images.length >= 12;
+    const { images, isLoading, showModal, totalImages } = this.state;
+    const showLoadMore = images.length !== totalImages && !isLoading;
 
     return (
       <div className={css.App}>
         <Searchbar onSubmit={this.onChangeQuery} />
         {images.length < 1 && <h2>The gallery is empty - use Search!</h2>}
-        <ImageGallery images={images} onClick={this.handleGalleryItem} />
+        {images.length > 1 && (
+          <ImageGallery images={images} onClick={this.handleGalleryItem} />
+        )}
         {isLoading && <Loader />}
         {showModal && <Modal onClose={this.toggleModal} />}
-        {ShowLoadMore && <Button onClick={this.getImages} />}
+        {showLoadMore && <Button onClick={this.loadMore} />}
       </div>
     );
   }

@@ -1,19 +1,17 @@
 import { Component } from 'react';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import { Modal } from '../Modal/Modal';
 import css from './ImageGalleryItem.module.css';
 
 export class ImageGalleryItem extends Component {
-  constructor(props) {
-    super(props);
+  static propTypes = {
+    src: PropTypes.string.isRequired,
+    tags: PropTypes.string,
+  };
 
-    this.src = props.src;
-    this.alt = props.tags;
-
-    this.state = {
-      isModalOpen: false,
-    };
-  }
+  state = {
+    isModalOpen: false,
+  };
 
   handleClick = () => {
     const { isModalOpen } = this.state;
@@ -39,10 +37,5 @@ export class ImageGalleryItem extends Component {
     );
   }
 }
-
-// ImageGalleryItem.propTypes = {
-//   src: PropTypes.string.isRequired,
-//   tags: PropTypes.string,
-// };
 
 export default ImageGalleryItem;

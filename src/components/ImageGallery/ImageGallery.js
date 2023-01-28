@@ -13,7 +13,6 @@ export const ImageGallery = ({ images }) => {
 };
 
 const imagesPropTypes = PropTypes.shape({
-  webformatURL: PropTypes.string.isRequired,
   largeImageURL: PropTypes.string.isRequired,
   tags: PropTypes.string.isRequired,
 }).isRequired;
@@ -26,7 +25,6 @@ ImageGallery.propTypes = {
 //   images: PropTypes.arrayOf(
 //     PropTypes.shape({
 //       id: PropTypes.string.isRequired,
-//       webformatURL: PropTypes.string.isRequired,
 //       largeImageURL: PropTypes.string.isRequired,
 //       tags: PropTypes.string.isRequired,
 //     })
